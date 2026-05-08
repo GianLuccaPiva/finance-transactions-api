@@ -2,8 +2,10 @@ package com.pismo.service;
 
 import com.pismo.dto.ClientAccountRequest;
 import com.pismo.dto.ClientAccountResponse;
+import com.pismo.exception.DuplicateDocumentException;
 import com.pismo.model.ClientAccountModel;
 import com.pismo.repository.ClientAccountRepo;
+import com.pismo.exception.AccountNotFoundException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ValidatorFactory;
@@ -22,6 +24,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 
 import java.util.Set;
+import java.util.Optional;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -80,10 +83,37 @@ public class ClientAccountServiceTest {
 
         when(clientAccountRepo.existsByDocumentNumber("12345678901")).thenReturn(true);
 
-     
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(DuplicateDocumentException.class, () -> {
             clientAccountService.createAccount(request);
         });
     }
+
+    @Test
+    void shouldGetAccountSuccessfully() {
     
+        ClientAccountModel account = new ClientAccountModel();
+        account.setAccountId(1L);
+        account.setDocumentNumber("12345678901");
+
+        when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account));
+
+        ClientAccountResponse response = clientAccountService.getAccount(1L);
+
+        assertNotNull(response);
+        assertEquals(1L, response.getAccountId());
+        assertEquals("12345678901", response.getDocumentNumber());
+        System.out.println("Account ID retornado: " + response.getAccountId());
+        System.out.println("Document retornado: " + response.getDocumentNumber());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAccountNotFound() {
+
+        when(clientAccountRepo.findById(99L)).thenReturn(Optional.empty());
+
+        AccountNotFoundException exception = assertThrows(AccountNotFoundException.class, () -> {
+            clientAccountService.getAccount(99L);
+        });
+        System.out.println("Exceção lançada: " + exception.getMessage());
+    }
 }

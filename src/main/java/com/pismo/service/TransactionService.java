@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
 
+import com.pismo.exception.AccountNotFoundException;
+import com.pismo.exception.InvalidTransactionException;
 import com.pismo.dto.TransactionRequest;
 import com.pismo.dto.TransactionResponse;
 import com.pismo.model.TransactionModel;
@@ -32,29 +34,27 @@ public class TransactionService {
 
     public TransactionResponse createTransaction(TransactionRequest request) {
         if (!clientAccountRepo.existsById(request.getAccountId())) {
-            throw new RuntimeException("Invalid Data");
-            // Erro genérico pensando em evitar resource enumeration
+            throw new AccountNotFoundException();
         }
 
         if (!operationTypeRepo.existsById(request.getOperationTypeId())) {
-            throw new RuntimeException("Invalid Data");
-            // Erro genérico pensando em evitar resource enumeration
+            throw new InvalidTransactionException("Invalid Transaction");
         }
 
         switch (request.getOperationTypeId().intValue()) {
             case 4 -> {
                 if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new IllegalArgumentException("Amount must be a positive value");
+                    throw new InvalidTransactionException("Amount must be a positive value");
                 }
             }
             
             case 1, 2, 3 -> {
                 if (request.getAmount().compareTo(BigDecimal.ZERO) >= 0) {
-                    throw new IllegalArgumentException("Amount Must be a negativa value");
+                    throw new InvalidTransactionException("Amount must be a negative value");
                     
                 }
             }
-            default -> throw new IllegalArgumentException("Invalid Operation Type");
+            default -> throw new InvalidTransactionException("Invalid Operation Type");
           
         }
 

@@ -2,6 +2,8 @@ package com.pismo.service;
 
 import org.springframework.stereotype.Service;
 
+import com.pismo.exception.AccountNotFoundException;
+import com.pismo.exception.DuplicateDocumentException;
 import com.pismo.dto.ClientAccountRequest;
 import com.pismo.dto.ClientAccountResponse;
 import com.pismo.model.ClientAccountModel;
@@ -19,9 +21,7 @@ public class ClientAccountService {
     public ClientAccountResponse createAccount(ClientAccountRequest request) {
 
         if (clientAccountRepo.existsByDocumentNumber(request.getDocumentNumber())) {
-            throw new RuntimeException("Cannot Create Account");
-            // Erro genérico para não informar que o número do documento
-            // já está no nosso banco de dados
+            throw new DuplicateDocumentException();
         }
 
         ClientAccountModel account = new ClientAccountModel();
@@ -36,7 +36,7 @@ public class ClientAccountService {
     public ClientAccountResponse getAccount(Long accountId) {
 
         ClientAccountModel account = clientAccountRepo.findById(accountId)
-        .orElseThrow(() -> new RuntimeException("Not Found"));
+        .orElseThrow(() -> new AccountNotFoundException());
 
         return new ClientAccountResponse(account.getAccountId(), account.getDocumentNumber());
 

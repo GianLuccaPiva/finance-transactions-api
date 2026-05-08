@@ -2,6 +2,8 @@ package com.pismo.service;
 
 import com.pismo.dto.TransactionRequest;
 import com.pismo.dto.TransactionResponse;
+import com.pismo.exception.AccountNotFoundException;
+import com.pismo.exception.InvalidTransactionException;
 import com.pismo.model.TransactionModel;
 import com.pismo.repository.ClientAccountRepo;
 import com.pismo.repository.OperationTypeRepo;
@@ -58,11 +60,11 @@ public class TransactionTest {
 
     when(clientAccountRepo.existsById(99L)).thenReturn(false);
 
-    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+    RuntimeException exception = assertThrows(AccountNotFoundException.class, () -> {
         transactionService.createTransaction(request);
     });
 
-    assertEquals("Invalid Data", exception.getMessage());
+    assertEquals("Account not found", exception.getMessage());
     System.out.println("Exceção lançada: " + exception.getMessage());
 }
 
@@ -74,11 +76,11 @@ public class TransactionTest {
         when(clientAccountRepo.existsById(1L)).thenReturn(true);
         when(operationTypeRepo.existsById(99L)).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
             transactionService.createTransaction(request);
         });
 
-        assertEquals("Invalid Data", exception.getMessage());
+        assertEquals("Invalid Transaction", exception.getMessage());
         System.out.println("Exceção lançada: " + exception.getMessage());
 
 
@@ -91,7 +93,7 @@ public class TransactionTest {
         when(clientAccountRepo.existsById(1L)).thenReturn(true);
         when(operationTypeRepo.existsById(4L)).thenReturn(true);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
             transactionService.createTransaction(request);
         });
 
@@ -107,12 +109,43 @@ public class TransactionTest {
         when(clientAccountRepo.existsById(1L)).thenReturn(true);
         when(operationTypeRepo.existsById(2L)).thenReturn(true);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
             transactionService.createTransaction(request);
         });
 
-        assertEquals("Amount Must be a negativa value", exception.getMessage());
+        assertEquals("Amount must be a negative value", exception.getMessage());
         System.out.println("Exceção lançada: " + exception.getMessage());
         
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDebitAmountIsZero() {
+        TransactionRequest request = new TransactionRequest(1L, 1L, new BigDecimal("0"));
+
+        when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(operationTypeRepo.existsById(1L)).thenReturn(true);
+
+        RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
+            transactionService.createTransaction(request);
+        });
+        
+        assertEquals("Amount must be a negative value", exception.getMessage());
+        System.out.println("Exceção lançada: " + exception.getMessage());
+
+    }
+    @Test
+    void shouldThrowExceptionWhenPaymentAmountIsZero() {
+        TransactionRequest request = new TransactionRequest(1L, 4L, new BigDecimal("0"));
+
+        when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(operationTypeRepo.existsById(4L)).thenReturn(true);
+
+        RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
+            transactionService.createTransaction(request);
+        });
+        
+        assertEquals("Amount must be a positive value", exception.getMessage());
+        System.out.println("Exceção lançada: " + exception.getMessage());
+
     }
 }

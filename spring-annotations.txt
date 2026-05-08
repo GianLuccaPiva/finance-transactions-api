@@ -65,8 +65,48 @@ Spring Annotations — Pismo Project
 
 @ExceptionHandler
   Marca um método para tratar um tipo específico de exceção lançada por qualquer controller.
-  Exemplo: @ExceptionHandler(RuntimeException.class) intercepta qualquer RuntimeException.
+  O Spring escolhe o handler mais específico primeiro — ex: AccountNotFoundException antes de RuntimeException.
+  Exemplo: @ExceptionHandler(AccountNotFoundException.class) intercepta apenas aquela exceção.
   Usado em: GlobalExceptionHandler.java
+
+
+====================
+ EXCEÇÕES CUSTOMIZADAS
+====================
+
+Conceito: extends RuntimeException
+  Cria uma exceção unchecked com semântica de negócio clara.
+  Unchecked significa que o compilador não obriga try/catch — a exceção sobe a pilha até o GlobalExceptionHandler.
+  Usar RuntimeException (não Exception) evita poluir os métodos dos services com throws ou try/catch.
+
+  Estrutura base:
+    public class MinhaException extends RuntimeException {
+        public MinhaException() {
+            super("mensagem fixa");          // mensagem fixa: sempre o mesmo motivo
+        }
+        public MinhaException(String msg) {
+            super(msg);                      // mensagem variável: motivo depende do contexto
+        }
+    }
+
+  Quando usar mensagem fixa vs variável:
+    - Fixa: quando a exceção sempre representa o mesmo motivo (ex: AccountNotFoundException → "Account not found")
+    - Variável: quando a exceção pode ocorrer por motivos diferentes (ex: InvalidTransactionException → amount inválido, tipo inválido)
+
+Exceções criadas no projeto:
+  AccountNotFoundException    → HTTP 404 Not Found       — conta não encontrada pelo id
+  DuplicateDocumentException  → HTTP 409 Conflict        — documento já cadastrado
+  InvalidTransactionException → HTTP 422 Unprocessable Entity — regra de negócio da transação violada
+
+  Arquivos: com/pismo/exception/AccountNotFoundException.java
+            com/pismo/exception/DuplicateDocumentException.java
+            com/pismo/exception/InvalidTransactionException.java
+
+Tradeoff de segurança: HTTP status e user enumeration
+  - 404 em GET /accounts/{id} pode confirmar que um recurso não existe (user enumeration).
+  - 422 em POST /transactions não expõe estado do banco — apenas informa que a regra de negócio não foi satisfeita.
+  - Em APIs sem autenticação, avaliar retornar respostas genéricas para evitar vazamento de informação.
+  - A mensagem no body é onde o vazamento acontece, não o status HTTP em si.
 
 
 ====================
@@ -131,3 +171,56 @@ Spring Annotations — Pismo Project
   Valida que o campo String segue uma expressão regular específica.
   Exemplo: @Pattern(regexp = "\\d{11}") garante exatamente 11 dígitos numéricos.
   Usado em: ClientAccountRequest.java
+
+
+====================
+ TESTES UNITÁRIOS
+====================
+
+Conceitos gerais
+  Teste unitário testa a lógica de um método de forma isolada, sem subir o Spring, sem banco de dados.
+  Testa se um método retorna o resultado correto dado um input simulado (mockado).
+  Não testa integração entre camadas nem comportamento end-to-end.
+
+  Cada caminho de código relevante merece um teste:
+    - Caminho de sucesso (happy path)
+    - Cada caminho de erro (exceções esperadas)
+
+@ExtendWith(MockitoExtension.class)
+  Habilita o Mockito no JUnit 5, permitindo o uso de @Mock e @InjectMocks.
+  Sem esta anotação, os mocks não são inicializados automaticamente.
+  Usado em: ClientAccountServiceTest.java, TransactionTest.java
+
+@Mock
+  Cria um "dublê" do objeto — substitui a dependência real por uma versão controlada.
+  O mock não executa lógica real; você programa o comportamento com when(...).thenReturn(...).
+  Usado para simular repositories sem tocar no banco de dados.
+  Usado em: ClientAccountServiceTest.java, TransactionTest.java
+
+@InjectMocks
+  Cria uma instância real da classe sendo testada e injeta os @Mocks como dependências.
+  A classe testada não sabe que está recebendo mocks — acha que são as dependências reais.
+  Usado em: ClientAccountServiceTest.java, TransactionTest.java
+
+Mockando comportamentos
+  when(repo.findById(1L)).thenReturn(Optional.of(obj))  → simula objeto encontrado
+  when(repo.findById(99L)).thenReturn(Optional.empty()) → simula objeto não encontrado
+  when(repo.existsById(1L)).thenReturn(true)            → simula existência
+  when(repo.save(any(Classe.class))).thenReturn(obj)    → simula persistência
+
+  any(Classe.class): matcher do Mockito que aceita qualquer instância daquela classe como argumento.
+
+Assertions principais (JUnit 5)
+  assertNotNull(obj)                          → garante que o objeto não é nulo
+  assertEquals(esperado, real)               → garante igualdade de valor
+  assertFalse(condicao)                       → garante que a condição é falsa
+  assertThrows(Excecao.class, () -> { ... }) → garante que o bloco lança aquela exceção
+    - Retorna a exceção lançada, permitindo verificar a mensagem com getMessage()
+    - Usar a classe específica (ex: AccountNotFoundException.class), não RuntimeException.class
+      Razão: ser preciso evita que o teste passe por uma exceção errada
+
+Optional nos testes
+  findById retorna Optional<T> porque o registro pode não existir.
+  Optional.of(obj)    → container com valor presente
+  Optional.empty()    → container vazio, simula "não encontrado"
+  O service usa .orElseThrow() para lançar a exceção quando o Optional está vazio.
