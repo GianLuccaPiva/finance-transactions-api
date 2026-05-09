@@ -1,5 +1,6 @@
 package com.pismo.service;
 
+import com.pismo.dto.BalanceResponse;
 import com.pismo.dto.TransactionRequest;
 import com.pismo.dto.TransactionResponse;
 import com.pismo.exception.AccountNotFoundException;
@@ -190,4 +191,41 @@ public class TransactionTest {
         assertEquals(2, response.size());
         System.out.println("Lista retornada " + response.size() + "transações");
     }
+
+    @Test
+    void shouldThrowExceptionWhenAccountNotFoundForBalance() {
+
+        when(clientAccountRepo.existsById(99L)).thenReturn(false);
+
+        AccountNotFoundException exception = assertThrows(AccountNotFoundException.class, () -> {
+        transactionService.getBalanceByAccountId(99L);
+        });
+
+        System.out.println("Exceção lançada: " + exception.getMessage());
+        }
+    
+    @Test
+    void shouldReturnZeroBalanceWhenAccountHasNoTransactions() {
+
+        when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(transactionRepo.sumAmountByAccountId(1L)).thenReturn(null);
+
+        BalanceResponse response = transactionService.getBalanceByAccountId(1L);
+
+        assertEquals(BigDecimal.ZERO, response.getBalance());
+        System.out.println("Balance retornado: " + response.getBalance());
+    }
+
+    @Test
+    void shouldReturnBalanceWhenAccountHasTransactions() {
+
+        when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(transactionRepo.sumAmountByAccountId(1L)).thenReturn(new BigDecimal("50.00"));
+
+        BalanceResponse response = transactionService.getBalanceByAccountId(1L);
+
+        assertEquals(new BigDecimal("50.00"), response.getBalance());
+        System.out.println("Balance retornado: " + response.getBalance());
+    }
+
 }

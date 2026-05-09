@@ -271,3 +271,33 @@ Spring Data JPA — Query por nome de método
     Boa prática para métodos de leitura em projetos maiores.
 
   Usado em: ClientAccountService.createAccount, TransactionService.createTransaction
+
+
+====================
+ QUERIES CUSTOMIZADAS (JPQL)
+====================
+
+@Query
+  Permite escrever queries manualmente em JPQL (Java Persistence Query Language).
+  Usado quando o Spring Data não consegue inferir a query pelo nome do método — como em agregações (SUM, COUNT, AVG).
+  JPQL referencia classes Java e seus campos, não tabelas e colunas do banco.
+  Exemplo: "SELECT SUM(t.amount) FROM TransactionModel t WHERE t.accountId = :accountId"
+    - TransactionModel → classe Java (não a tabela "transactions")
+    - t.amount → campo da classe (não a coluna "Amount")
+    - :accountId → parâmetro nomeado, vinculado pelo @Param
+  Usado em: TransactionRepo.java
+
+@Param
+  Vincula um parâmetro do método ao placeholder nomeado (:nome) na query JPQL.
+  Exemplo: @Param("accountId") Long accountId → substitui :accountId na query.
+  Usado em: TransactionRepo.java
+
+Tratando null em agregações
+  SUM retorna null quando não há registros correspondentes no banco.
+  Tratar com operador ternário: balance != null ? balance : BigDecimal.ZERO
+  Nunca assumir que o resultado de uma agregação é não-nulo.
+
+DTO de resposta — Response vs Request
+  Request → dados que chegam do cliente (corpo do POST, parâmetros). Pode ter @NotNull, @Valid.
+  Response → dados que o servidor devolve. Não usa anotações de validação (@NotNull, @Valid).
+  Exemplo: BalanceResponse(Long accountId, BigDecimal balance) — sem @NotNull nos campos.

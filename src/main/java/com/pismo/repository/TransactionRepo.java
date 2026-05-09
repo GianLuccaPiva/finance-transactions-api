@@ -1,12 +1,19 @@
 package com.pismo.repository;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import com.pismo.model.TransactionModel;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TransactionRepo extends JpaRepository<TransactionModel, Long> {
+
+    @Query("SELECT SUM(t.amount) FROM TransactionModel t WHERE t.accountId = :accountId")
+    BigDecimal sumAmountByAccountId(@Param("accountId") Long accountId);
 
     List<TransactionModel> findByAccountId(Long accountId);
     

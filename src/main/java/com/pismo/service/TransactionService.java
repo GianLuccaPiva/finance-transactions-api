@@ -10,8 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pismo.exception.AccountNotFoundException;
 import com.pismo.exception.InvalidTransactionException;
+
+import com.pismo.dto.BalanceResponse;
 import com.pismo.dto.TransactionRequest;
 import com.pismo.dto.TransactionResponse;
+
 import com.pismo.model.TransactionModel;
 import com.pismo.repository.ClientAccountRepo;
 import com.pismo.repository.OperationTypeRepo;
@@ -91,9 +94,20 @@ public class TransactionService {
             saved.getAmount()    
         );
 
-
-
     }
+
+    public BalanceResponse getBalanceByAccountId(Long accountId) {
+
+            if (!clientAccountRepo.existsById(accountId)) {
+            throw new AccountNotFoundException();
+            }
+
+            BigDecimal balance = transactionRepo.sumAmountByAccountId(accountId);
+            balance = balance != null ? balance : BigDecimal.ZERO;
+
+            return new BalanceResponse(accountId, balance);
+
+        }
 }
 
 

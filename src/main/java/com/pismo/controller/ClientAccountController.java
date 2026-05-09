@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 
+import com.pismo.dto.BalanceResponse;
 import com.pismo.dto.ClientAccountRequest;
 import com.pismo.dto.ClientAccountResponse;
 import com.pismo.dto.TransactionResponse;
@@ -53,6 +54,12 @@ public class ClientAccountController {
     @GetMapping("/{id}/transactions")
     public ResponseEntity<List<TransactionResponse>> getTransactionsByAccountId(@PathVariable Long id) {
         List<TransactionResponse> response = transactionService.getTransactionsByAccountId(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/balance")
+    public ResponseEntity<BalanceResponse> getBalanceByAccountId(@PathVariable Long id) {
+        BalanceResponse response = transactionService.getBalanceByAccountId(id);
         return ResponseEntity.ok(response);
     }
         
