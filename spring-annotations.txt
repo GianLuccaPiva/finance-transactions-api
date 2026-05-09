@@ -224,3 +224,26 @@ Optional nos testes
   Optional.of(obj)    → container com valor presente
   Optional.empty()    → container vazio, simula "não encontrado"
   O service usa .orElseThrow() para lançar a exceção quando o Optional está vazio.
+
+Testando listas
+  when(repo.findByAccountId(1L)).thenReturn(List.of())           → simula lista vazia
+  when(repo.findByAccountId(1L)).thenReturn(List.of(obj1, obj2)) → simula lista com itens
+  List.of() cria uma lista vazia imutável — jeito idiomático em Java moderno.
+
+  Assertions para listas:
+    assertTrue(response.isEmpty())    → verifica que a lista está vazia
+    assertEquals(2, response.size())  → verifica quantidade de itens
+    assertNotNull(response)           → verifica que a lista não é nula
+
+  Três casos a testar em métodos que retornam listas:
+    1. Recurso pai não existe → exceção
+    2. Recurso pai existe, sem itens → lista vazia
+    3. Recurso pai existe, com itens → lista com os itens
+  Separar casos 2 e 3 é boa prática: "sem resultados" e "com resultados" são comportamentos distintos.
+
+Spring Data JPA — Query por nome de método
+  O Spring Data gera queries automaticamente a partir do nome do método no repository.
+  Padrão: findBy + NomeDoCampo
+  Exemplo: findByAccountId(Long accountId) → SELECT * FROM transactions WHERE account_id = ?
+  Retorna List<T> quando pode haver múltiplos resultados, Optional<T> quando é único.
+  Usado em: TransactionRepo.java

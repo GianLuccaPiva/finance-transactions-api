@@ -1,7 +1,8 @@
 package com.pismo.service;
 
 import java.math.BigDecimal;
-
+import java.util.stream.Collectors;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,20 @@ public class TransactionService {
             this.clientAccountRepo = clientAccountRepo;
             this.operationTypeRepo = operationTypeRepo;
             this.transactionRepo = transactionRepo;
+    }
+
+    public List<TransactionResponse> getTransactionsByAccountId(Long accountId) {
+
+        if (!clientAccountRepo.existsById(accountId)) {
+        throw new AccountNotFoundException();
+        }
+
+        List<TransactionModel> transactions = transactionRepo.findByAccountId(accountId);
+
+        return transactions.stream()
+        .map(t -> new TransactionResponse(t.getTransactionId(), t.getAccountId(), t.getOperationTypeId(), t.getAmount()))
+        .collect(Collectors.toList());
+
     }
 
     public TransactionResponse createTransaction(TransactionRequest request) {

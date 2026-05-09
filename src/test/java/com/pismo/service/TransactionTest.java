@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,6 +54,7 @@ public class TransactionTest {
     System.out.println("Transaction criada com accountId: " + response.getAccountId());
     System.out.println("Amount: " + response.getAmount());
 }
+
     @Test
     void shouldThrowExceptionWhenAccountNotFound() {
 
@@ -147,5 +149,45 @@ public class TransactionTest {
         assertEquals("Amount must be a positive value", exception.getMessage());
         System.out.println("Exceção lançada: " + exception.getMessage());
 
+    }
+
+    @Test
+    void shouldThrowExceptionWhenGetTransactionsDontFindAccount() {
+
+        when(clientAccountRepo.existsById(99L)).thenReturn(false);
+
+        AccountNotFoundException exception = assertThrows(AccountNotFoundException.class, () -> {
+         transactionService.getTransactionsByAccountId(99L);
+        });
+        
+        System.out.println("Exceção lançada: " + exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenAccountHasNoTransactions() {
+
+        when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(transactionRepo.findByAccountId(1L)).thenReturn(List.of());
+
+        List<TransactionResponse> response = transactionService.getTransactionsByAccountId(1L);
+
+        assertTrue(response.isEmpty());
+        System.out.println("Lista retornada: " + response.size() + " transações");
+
+    }
+
+    @Test
+    void shouldReturnTransactionsWhenAccountExists() {
+
+        when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(transactionRepo.findByAccountId(1L)).thenReturn(List.of(
+            new TransactionModel(1L, 1L, new BigDecimal("-50.00")),
+            new TransactionModel(1L, 2L, new BigDecimal("-150.00"))
+        ));
+    
+        List<TransactionResponse> response = transactionService.getTransactionsByAccountId(1L);
+
+        assertEquals(2, response.size());
+        System.out.println("Lista retornada " + response.size() + "transações");
     }
 }

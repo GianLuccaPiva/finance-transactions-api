@@ -11,7 +11,11 @@ import org.springframework.http.HttpStatus;
 
 import com.pismo.dto.ClientAccountRequest;
 import com.pismo.dto.ClientAccountResponse;
+import com.pismo.dto.TransactionResponse;
 import com.pismo.service.ClientAccountService;
+import com.pismo.service.TransactionService;
+
+import java.util.List;
 
 import jakarta.validation.Valid;
 
@@ -20,9 +24,11 @@ import jakarta.validation.Valid;
 public class ClientAccountController {
 
     private ClientAccountService clientAccountService;
+    private TransactionService transactionService;
     
-    public ClientAccountController(ClientAccountService clientAccountService) {
+    public ClientAccountController(ClientAccountService clientAccountService, TransactionService transactionService) {
         this.clientAccountService = clientAccountService;
+        this.transactionService = transactionService;
     }
 
     @PostMapping
@@ -42,6 +48,12 @@ public class ClientAccountController {
 
         ClientAccountResponse response = clientAccountService.getAccount(id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/{id}/transactions")
+    public ResponseEntity<List<TransactionResponse>> getTransactionsByAccountId(@PathVariable Long id) {
+        List<TransactionResponse> response = transactionService.getTransactionsByAccountId(id);
+        return ResponseEntity.ok(response);
     }
         
 }
