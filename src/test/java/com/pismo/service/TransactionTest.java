@@ -3,6 +3,10 @@ package com.pismo.service;
 import com.pismo.dto.BalanceResponse;
 import com.pismo.dto.TransactionRequest;
 import com.pismo.dto.TransactionResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import com.pismo.exception.AccountNotFoundException;
 import com.pismo.exception.InvalidTransactionException;
 import com.pismo.model.TransactionModel;
@@ -226,6 +230,40 @@ public class TransactionTest {
 
         assertEquals(new BigDecimal("50.00"), response.getBalance());
         System.out.println("Balance retornado: " + response.getBalance());
+    }
+
+    @Test
+    void shouldReturnEmptyPageWhenNoTransactionsExist() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(transactionRepo.findAll(pageable)).thenReturn(Page.empty());
+
+        Page<TransactionResponse> response = transactionService.getTransactions(pageable);
+
+        assertTrue(response.isEmpty());
+        System.out.println("Página retornada vazia: " + response.isEmpty());
+
+    }
+
+    @Test
+    void shouldReturnPageWithTransactionsWhenTransactionsExist() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<TransactionModel> page = new PageImpl<>(List.of(
+            new TransactionModel(1L, 1L, new BigDecimal("-50.00")),
+            new TransactionModel(1L, 1L, new BigDecimal("-100.00")),
+            new TransactionModel(1L, 1L, new BigDecimal("-50.00"))
+        ));
+        
+        when(transactionRepo.findAll(pageable)).thenReturn(page);
+
+        Page<TransactionResponse> response = transactionService.getTransactions(pageable);
+
+        assertEquals(3, response.getTotalElements());
+        System.out.println("Página retornada: " + response.getTotalElements() + " transações");
+
     }
 
 }

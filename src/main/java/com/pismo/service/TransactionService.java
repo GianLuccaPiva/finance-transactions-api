@@ -6,7 +6,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.pismo.exception.AccountNotFoundException;
 import com.pismo.exception.InvalidTransactionException;
@@ -108,6 +109,16 @@ public class TransactionService {
             return new BalanceResponse(accountId, balance);
 
         }
+
+    public Page<TransactionResponse> getTransactions(Pageable pageable) {
+
+        Page<TransactionModel> transactionPage = transactionRepo.findAll(pageable);
+        
+        return transactionPage.map(t -> new TransactionResponse(
+        t.getTransactionId(), t.getAccountId(), t.getOperationTypeId(), t.getAmount()
+        ));
+
+    }
 }
 
 

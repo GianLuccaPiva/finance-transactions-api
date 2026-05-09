@@ -301,3 +301,48 @@ DTO de resposta — Response vs Request
   Request → dados que chegam do cliente (corpo do POST, parâmetros). Pode ter @NotNull, @Valid.
   Response → dados que o servidor devolve. Não usa anotações de validação (@NotNull, @Valid).
   Exemplo: BalanceResponse(Long accountId, BigDecimal balance) — sem @NotNull nos campos.
+
+
+====================
+ PAGINAÇÃO (Pageable / Page)
+====================
+
+Pageable
+  Interface do Spring Data que encapsula os parâmetros de paginação: página, tamanho e ordenação.
+  O Spring monta automaticamente o Pageable a partir dos query params da URL:
+    GET /transactions?page=0&size=10 → Pageable com página 0, 10 itens por página
+  Declarar como parâmetro do método no controller — o Spring injeta automaticamente.
+  Usado em: TransactionController.java, TransactionService.java, TransactionRepo.java
+
+PageRequest.of(page, size)
+  Implementação concreta de Pageable, usada principalmente em testes para criar o objeto manualmente.
+  Exemplo: PageRequest.of(0, 10) → primeira página com 10 itens.
+
+Page<T>
+  Retorno de queries paginadas. Contém os dados E metadados da paginação.
+  Métodos úteis:
+    getContent()       → lista de itens da página atual
+    getTotalElements() → total de registros no banco (via COUNT automático)
+    getTotalPages()    → total de páginas
+    hasNext()          → se existe próxima página
+    isEmpty()          → se a página está vazia
+  Internamente faz duas queries: uma para os dados (LIMIT/OFFSET) e uma COUNT para os metadados.
+
+Page.empty()
+  Retorna uma página vazia — usado em mocks de teste.
+
+PageImpl<T>
+  Implementação concreta de Page usada em testes para simular retornos paginados.
+  Exemplo: new PageImpl<>(List.of(item1, item2))
+
+Page.map()
+  Transforma o conteúdo da página sem perder os metadados de paginação.
+  Usado para converter Page<TransactionModel> em Page<TransactionResponse>.
+  Alternativa ao stream().map().collect() — mais adequado para Page pois preserva totalElements, totalPages, etc.
+
+Tradeoffs da paginação por offset (page/size)
+  Vantagem: simples de implementar e entender.
+  Desvantagem: cursor drift — se dados mudam entre requisições, itens podem ser duplicados ou pulados.
+  Alternativa avançada: paginação por cursor (usando o ID do último item) — evita cursor drift.
+  Slice<T>: alternativa mais leve que Page — não faz COUNT, só sabe se tem próxima página (hasNext()).
+  Usado em: TransactionController.java, TransactionService.java, TransactionRepo.java

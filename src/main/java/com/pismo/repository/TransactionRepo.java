@@ -2,6 +2,8 @@ package com.pismo.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.pismo.model.TransactionModel;
 
@@ -16,5 +18,7 @@ public interface TransactionRepo extends JpaRepository<TransactionModel, Long> {
     BigDecimal sumAmountByAccountId(@Param("accountId") Long accountId);
 
     List<TransactionModel> findByAccountId(Long accountId);
+
+    Page<TransactionModel> findAll(Pageable pageable);
     
 }
