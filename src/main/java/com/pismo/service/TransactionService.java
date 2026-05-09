@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import com.pismo.exception.AccountNotFoundException;
 import com.pismo.exception.InvalidTransactionException;
@@ -17,7 +19,7 @@ import com.pismo.repository.TransactionRepo;
 
 
 
-@Service   
+@Service  
 public class TransactionService {
 
     private final ClientAccountRepo clientAccountRepo;
@@ -47,6 +49,7 @@ public class TransactionService {
 
     }
 
+    @Transactional
     public TransactionResponse createTransaction(TransactionRequest request) {
         if (!clientAccountRepo.existsById(request.getAccountId())) {
             throw new AccountNotFoundException();

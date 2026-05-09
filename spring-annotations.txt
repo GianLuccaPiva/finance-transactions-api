@@ -247,3 +247,27 @@ Spring Data JPA — Query por nome de método
   Exemplo: findByAccountId(Long accountId) → SELECT * FROM transactions WHERE account_id = ?
   Retorna List<T> quando pode haver múltiplos resultados, Optional<T> quando é único.
   Usado em: TransactionRepo.java
+
+
+====================
+ TRANSAÇÕES DE BANCO
+====================
+
+@Transactional
+  Garante atomicidade na operação — tudo ou nada.
+  Se qualquer operação dentro do método falhar, o Spring faz rollback automático de tudo que foi feito no banco.
+  Gerenciado pelo Spring via proxy: o Spring intercepta a chamada ao método e envolve com abertura/commit/rollback de transação.
+
+  Onde usar:
+    - Métodos de escrita: save, update, delete → @Transactional
+    - Métodos de leitura: find, get → não precisa (opcional: @Transactional(readOnly = true) para otimização)
+
+  Onde NÃO colocar:
+    - Na classe inteira, a menos que todos os métodos sejam de escrita
+    - Em métodos de leitura simples sem necessidade de consistência transacional
+
+  @Transactional(readOnly = true)
+    Avisa o banco que não haverá escrita, permitindo otimizações internas.
+    Boa prática para métodos de leitura em projetos maiores.
+
+  Usado em: ClientAccountService.createAccount, TransactionService.createTransaction

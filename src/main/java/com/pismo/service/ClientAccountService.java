@@ -1,6 +1,8 @@
 package com.pismo.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import com.pismo.exception.AccountNotFoundException;
 import com.pismo.exception.DuplicateDocumentException;
@@ -18,6 +20,7 @@ public class ClientAccountService {
         this.clientAccountRepo = clientAccountRepo;
     }
 
+    @Transactional
     public ClientAccountResponse createAccount(ClientAccountRequest request) {
 
         if (clientAccountRepo.existsByDocumentNumber(request.getDocumentNumber())) {
