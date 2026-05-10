@@ -3,7 +3,7 @@ package com.pismo.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import com.pismo.exception.InvalidTransactionException;
 import com.pismo.exception.AccountNotFoundException;
 import com.pismo.exception.DuplicateDocumentException;
 import com.pismo.dto.ClientAccountRequest;
@@ -13,6 +13,7 @@ import com.pismo.repository.ClientAccountRepo;
 
 @Service
 public class ClientAccountService {
+
 
     private ClientAccountRepo clientAccountRepo;
 
@@ -33,6 +34,22 @@ public class ClientAccountService {
         ClientAccountModel saved = clientAccountRepo.save(account);
 
         return new ClientAccountResponse(saved.getAccountId(), saved.getDocumentNumber());
+
+    }
+
+    @Transactional
+    public void deleteAccountById(Long accountId) {
+
+       ClientAccountModel account = clientAccountRepo.findById(accountId)
+        .orElseThrow(() -> new AccountNotFoundException());
+
+        if (!account.isAccountState()) {
+        throw new InvalidTransactionException("Account is already inactive");
+        }
+
+        account.setAccountState(false);
+
+        clientAccountRepo.save(account);
 
     }
 

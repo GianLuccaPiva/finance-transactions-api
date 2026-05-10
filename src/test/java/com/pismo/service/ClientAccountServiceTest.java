@@ -3,6 +3,7 @@ package com.pismo.service;
 import com.pismo.dto.ClientAccountRequest;
 import com.pismo.dto.ClientAccountResponse;
 import com.pismo.exception.DuplicateDocumentException;
+import com.pismo.exception.InvalidTransactionException;
 import com.pismo.model.ClientAccountModel;
 import com.pismo.repository.ClientAccountRepo;
 import com.pismo.exception.AccountNotFoundException;
@@ -115,5 +116,46 @@ public class ClientAccountServiceTest {
             clientAccountService.getAccount(99L);
         });
         System.out.println("Exceção lançada: " + exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAccountNotFoundForDelete() {
+
+        when(clientAccountRepo.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(AccountNotFoundException.class, () -> {
+            clientAccountService.deleteAccountById(99L);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAccountIsAlreadyInactive() {
+
+        ClientAccountModel account = new ClientAccountModel();
+        account.setAccountState(false);
+
+        when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account));
+
+        InvalidTransactionException exception = assertThrows(InvalidTransactionException.class, () -> {
+            clientAccountService.deleteAccountById(1L);
+        });
+
+        assertEquals("Account is already inactive", exception.getMessage());
+        System.out.println("Exceção lançada: " + exception.getMessage());
+    }
+
+    @Test
+    void shouldDeactivateAccountSuccessfully() {
+
+        ClientAccountModel account = new ClientAccountModel();
+        account.setAccountState(true);
+
+        when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account));
+        when(clientAccountRepo.save(any(ClientAccountModel.class))).thenReturn(account);
+
+        clientAccountService.deleteAccountById(1L);
+
+        assertFalse(account.isAccountState());
+        System.out.println("Account state após desativação: " + account.isAccountState());
     }
 }

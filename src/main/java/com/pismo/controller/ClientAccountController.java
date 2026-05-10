@@ -1,6 +1,7 @@
 package com.pismo.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,6 +62,13 @@ public class ClientAccountController {
     public ResponseEntity<BalanceResponse> getBalanceByAccountId(@PathVariable Long id) {
         BalanceResponse response = transactionService.getBalanceByAccountId(id);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAccountById(@PathVariable Long id) {
+        
+        clientAccountService.deleteAccountById(id);
+        return ResponseEntity.noContent().build();
     }
         
 }

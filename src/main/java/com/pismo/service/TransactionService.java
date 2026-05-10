@@ -15,7 +15,7 @@ import com.pismo.exception.InvalidTransactionException;
 import com.pismo.dto.BalanceResponse;
 import com.pismo.dto.TransactionRequest;
 import com.pismo.dto.TransactionResponse;
-
+import com.pismo.model.ClientAccountModel;
 import com.pismo.model.TransactionModel;
 import com.pismo.repository.ClientAccountRepo;
 import com.pismo.repository.OperationTypeRepo;
@@ -55,9 +55,17 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse createTransaction(TransactionRequest request) {
+
         if (!clientAccountRepo.existsById(request.getAccountId())) {
             throw new AccountNotFoundException();
         }
+
+        ClientAccountModel account = clientAccountRepo.findById(request.getAccountId())
+        .orElseThrow(() -> new AccountNotFoundException());
+
+        if (!account.isAccountState()) {
+        throw new InvalidTransactionException("Invalid Transaction");
+}
 
         if (!operationTypeRepo.existsById(request.getOperationTypeId())) {
             throw new InvalidTransactionException("Invalid Transaction");

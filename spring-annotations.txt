@@ -346,3 +346,43 @@ Tradeoffs da paginação por offset (page/size)
   Alternativa avançada: paginação por cursor (usando o ID do último item) — evita cursor drift.
   Slice<T>: alternativa mais leve que Page — não faz COUNT, só sabe se tem próxima página (hasNext()).
   Usado em: TransactionController.java, TransactionService.java, TransactionRepo.java
+
+
+====================
+ EXCLUSÃO LÓGICA
+====================
+
+Conceito
+  Exclusão lógica (soft delete) desativa um registro sem removê-lo do banco.
+  Usada quando dados precisam ser preservados por motivos legais, de auditoria ou reversibilidade.
+  Em dados financeiros: obrigação de retenção por compliance (Banco Central, Receita Federal).
+
+Implementação com boolean
+  Adicionar campo boolean active (ou accountState) na entidade com valor padrão true.
+  @Column(name = "account_state", nullable = false)
+  private boolean accountState = true;
+  O "delete" apenas seta o campo para false e salva — nenhum registro é removido do banco.
+
+  Getter para boolean segue convenção isXxx() em vez de getXxx():
+    public boolean isAccountState() { return accountState; }
+  Razão: especificação JavaBeans — frameworks como Spring e Jackson reconhecem is como getter booleano.
+
+@DeleteMapping
+  Mapeia requisições HTTP DELETE para um método do controller.
+  Exemplo: @DeleteMapping("/{id}") → DELETE /accounts/{id}
+  Usado em: ClientAccountController.java
+
+HTTP 204 No Content
+  Status para operações de delete bem sucedidas sem corpo de resposta.
+  ResponseEntity<Void> com ResponseEntity.noContent().build()
+  Alternativa: HTTP 200 com corpo — útil quando o cliente precisa confirmar o estado final do recurso.
+
+Tradeoffs: boolean vs String para estado
+  boolean active → simples, dois estados (ativo/inativo). Suficiente para escopo básico.
+  String accountState → flexível, permite múltiplos estados ("ACTIVE", "INACTIVE", "SUSPENDED").
+  Escolher String quando o domínio exige mais de dois estados ou pode expandir no futuro.
+
+Validação de estado antes de desativar
+  Verificar se o recurso já está inativo antes de tentar desativar — evita operações redundantes.
+  Lançar exceção semântica (ex: InvalidTransactionException com mensagem descritiva).
+  Ordem: (1) verificar existência → AccountNotFoundException, (2) verificar estado → exceção de conflito.

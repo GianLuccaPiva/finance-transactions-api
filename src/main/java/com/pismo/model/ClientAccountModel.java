@@ -18,6 +18,9 @@ public class ClientAccountModel {
     @Column(name = "document_number", nullable = false, unique = true)
     private String documentNumber;
 
+    @Column(name = "account_state", nullable =false)
+    private boolean accountState = true;
+
     public ClientAccountModel() {}
 
     public Long getAccountId() { return accountId; }
@@ -25,5 +28,8 @@ public class ClientAccountModel {
 
     public String getDocumentNumber() { return documentNumber; }
     public void setDocumentNumber(String documentNumber) { this.documentNumber = documentNumber; }
-    
+
+    public boolean isAccountState() { return accountState; }
+    public void setAccountState(boolean accountState) { this.accountState = accountState; }
+
 }

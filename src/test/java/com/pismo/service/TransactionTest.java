@@ -9,7 +9,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.pismo.exception.AccountNotFoundException;
 import com.pismo.exception.InvalidTransactionException;
+import com.pismo.model.ClientAccountModel;
 import com.pismo.model.TransactionModel;
+import java.util.Optional;
 import com.pismo.repository.ClientAccountRepo;
 import com.pismo.repository.OperationTypeRepo;
 import com.pismo.repository.TransactionRepo;
@@ -45,11 +47,15 @@ public class TransactionTest {
     @Test
     void shouldCreateTransactionSuccessfully() {
 
+    
     TransactionRequest request = new TransactionRequest(1L, 1L, new BigDecimal("-50.00"));
 
     TransactionModel saved = new TransactionModel(1L, 1L, new BigDecimal("-50.00"));
 
+    ClientAccountModel account = new ClientAccountModel();
+    account.setAccountState(true);
     when(clientAccountRepo.existsById(1L)).thenReturn(true);
+    when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account));
     when(operationTypeRepo.existsById(1L)).thenReturn(true);
     when(transactionRepo.save(any(TransactionModel.class))).thenReturn(saved);
 
@@ -80,7 +86,10 @@ public class TransactionTest {
 
         TransactionRequest request = new TransactionRequest(1L, 99L, new BigDecimal("-50.00"));
 
+        ClientAccountModel account = new ClientAccountModel();
+        account.setAccountState(true);
         when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account));
         when(operationTypeRepo.existsById(99L)).thenReturn(false);
 
         RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
@@ -97,7 +106,10 @@ public class TransactionTest {
     void shouldThrowExceptionWhenPaymentHasNegativeAmount() {
         TransactionRequest request = new TransactionRequest(1L, 4L, new BigDecimal("-50.00"));
 
+        ClientAccountModel account4 = new ClientAccountModel();
+        account4.setAccountState(true);
         when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account4));
         when(operationTypeRepo.existsById(4L)).thenReturn(true);
 
         RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
@@ -113,7 +125,10 @@ public class TransactionTest {
     void shouldThrowExceptionWhenDebitOperationHasPositiveAmount() {
         TransactionRequest request = new TransactionRequest(1L, 2L, new BigDecimal("50.00"));
 
+        ClientAccountModel account2 = new ClientAccountModel();
+        account2.setAccountState(true);
         when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account2));
         when(operationTypeRepo.existsById(2L)).thenReturn(true);
 
         RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
@@ -129,13 +144,16 @@ public class TransactionTest {
     void shouldThrowExceptionWhenDebitAmountIsZero() {
         TransactionRequest request = new TransactionRequest(1L, 1L, new BigDecimal("0"));
 
+        ClientAccountModel account1 = new ClientAccountModel();
+        account1.setAccountState(true);
         when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account1));
         when(operationTypeRepo.existsById(1L)).thenReturn(true);
 
         RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
             transactionService.createTransaction(request);
         });
-        
+
         assertEquals("Amount must be a negative value", exception.getMessage());
         System.out.println("Exceção lançada: " + exception.getMessage());
 
@@ -144,7 +162,10 @@ public class TransactionTest {
     void shouldThrowExceptionWhenPaymentAmountIsZero() {
         TransactionRequest request = new TransactionRequest(1L, 4L, new BigDecimal("0"));
 
+        ClientAccountModel account4b = new ClientAccountModel();
+        account4b.setAccountState(true);
         when(clientAccountRepo.existsById(1L)).thenReturn(true);
+        when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account4b));
         when(operationTypeRepo.existsById(4L)).thenReturn(true);
 
         RuntimeException exception = assertThrows(InvalidTransactionException.class, () -> {
