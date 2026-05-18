@@ -1,4 +1,4 @@
-package com.pismo.exception;
+package com.financetransactions.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

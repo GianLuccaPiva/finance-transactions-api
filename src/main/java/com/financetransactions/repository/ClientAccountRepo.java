@@ -1,6 +1,6 @@
-package com.pismo.repository;
+package com.financetransactions.repository;
 
-import com.pismo.model.ClientAccountModel;
+import com.financetransactions.model.ClientAccountModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ClientAccountRepo extends JpaRepository<ClientAccountModel, Long>{

@@ -1,4 +1,4 @@
-package com.pismo.service;
+package com.financetransactions.service;
 
 import java.math.BigDecimal;
 import java.util.stream.Collectors;
@@ -9,17 +9,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.pismo.exception.AccountNotFoundException;
-import com.pismo.exception.InvalidTransactionException;
+import com.financetransactions.exception.AccountNotFoundException;
+import com.financetransactions.exception.InvalidTransactionException;
 
-import com.pismo.dto.BalanceResponse;
-import com.pismo.dto.TransactionRequest;
-import com.pismo.dto.TransactionResponse;
-import com.pismo.model.ClientAccountModel;
-import com.pismo.model.TransactionModel;
-import com.pismo.repository.ClientAccountRepo;
-import com.pismo.repository.OperationTypeRepo;
-import com.pismo.repository.TransactionRepo;
+import com.financetransactions.dto.BalanceResponse;
+import com.financetransactions.dto.TransactionRequest;
+import com.financetransactions.dto.TransactionResponse;
+import com.financetransactions.model.ClientAccountModel;
+import com.financetransactions.model.TransactionModel;
+import com.financetransactions.repository.ClientAccountRepo;
+import com.financetransactions.repository.OperationTypeRepo;
+import com.financetransactions.repository.TransactionRepo;
 
 
 
@@ -56,16 +56,12 @@ public class TransactionService {
     @Transactional
     public TransactionResponse createTransaction(TransactionRequest request) {
 
-        if (!clientAccountRepo.existsById(request.getAccountId())) {
-            throw new AccountNotFoundException();
-        }
-
         ClientAccountModel account = clientAccountRepo.findById(request.getAccountId())
         .orElseThrow(() -> new AccountNotFoundException());
 
         if (!account.isAccountState()) {
         throw new InvalidTransactionException("Invalid Transaction");
-}
+        }
 
         if (!operationTypeRepo.existsById(request.getOperationTypeId())) {
             throw new InvalidTransactionException("Invalid Transaction");

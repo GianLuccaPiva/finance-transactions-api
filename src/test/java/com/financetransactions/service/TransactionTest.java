@@ -1,20 +1,20 @@
-package com.pismo.service;
+package com.financetransactions.service;
 
-import com.pismo.dto.BalanceResponse;
-import com.pismo.dto.TransactionRequest;
-import com.pismo.dto.TransactionResponse;
+import com.financetransactions.dto.BalanceResponse;
+import com.financetransactions.dto.TransactionRequest;
+import com.financetransactions.dto.TransactionResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import com.pismo.exception.AccountNotFoundException;
-import com.pismo.exception.InvalidTransactionException;
-import com.pismo.model.ClientAccountModel;
-import com.pismo.model.TransactionModel;
+import com.financetransactions.exception.AccountNotFoundException;
+import com.financetransactions.exception.InvalidTransactionException;
+import com.financetransactions.model.ClientAccountModel;
+import com.financetransactions.model.TransactionModel;
 import java.util.Optional;
-import com.pismo.repository.ClientAccountRepo;
-import com.pismo.repository.OperationTypeRepo;
-import com.pismo.repository.TransactionRepo;
+import com.financetransactions.repository.ClientAccountRepo;
+import com.financetransactions.repository.OperationTypeRepo;
+import com.financetransactions.repository.TransactionRepo;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,6 @@ public class TransactionTest {
 
     ClientAccountModel account = new ClientAccountModel();
     account.setAccountState(true);
-    when(clientAccountRepo.existsById(1L)).thenReturn(true);
     when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account));
     when(operationTypeRepo.existsById(1L)).thenReturn(true);
     when(transactionRepo.save(any(TransactionModel.class))).thenReturn(saved);
@@ -71,8 +70,6 @@ public class TransactionTest {
 
     TransactionRequest request = new TransactionRequest(99L, 1L, new BigDecimal("-50.00"));
 
-    when(clientAccountRepo.existsById(99L)).thenReturn(false);
-
     RuntimeException exception = assertThrows(AccountNotFoundException.class, () -> {
         transactionService.createTransaction(request);
     });
@@ -88,7 +85,6 @@ public class TransactionTest {
 
         ClientAccountModel account = new ClientAccountModel();
         account.setAccountState(true);
-        when(clientAccountRepo.existsById(1L)).thenReturn(true);
         when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account));
         when(operationTypeRepo.existsById(99L)).thenReturn(false);
 
@@ -108,7 +104,6 @@ public class TransactionTest {
 
         ClientAccountModel account4 = new ClientAccountModel();
         account4.setAccountState(true);
-        when(clientAccountRepo.existsById(1L)).thenReturn(true);
         when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account4));
         when(operationTypeRepo.existsById(4L)).thenReturn(true);
 
@@ -127,7 +122,6 @@ public class TransactionTest {
 
         ClientAccountModel account2 = new ClientAccountModel();
         account2.setAccountState(true);
-        when(clientAccountRepo.existsById(1L)).thenReturn(true);
         when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account2));
         when(operationTypeRepo.existsById(2L)).thenReturn(true);
 
@@ -146,7 +140,6 @@ public class TransactionTest {
 
         ClientAccountModel account1 = new ClientAccountModel();
         account1.setAccountState(true);
-        when(clientAccountRepo.existsById(1L)).thenReturn(true);
         when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account1));
         when(operationTypeRepo.existsById(1L)).thenReturn(true);
 
@@ -164,7 +157,6 @@ public class TransactionTest {
 
         ClientAccountModel account4b = new ClientAccountModel();
         account4b.setAccountState(true);
-        when(clientAccountRepo.existsById(1L)).thenReturn(true);
         when(clientAccountRepo.findById(1L)).thenReturn(Optional.of(account4b));
         when(operationTypeRepo.existsById(4L)).thenReturn(true);
 

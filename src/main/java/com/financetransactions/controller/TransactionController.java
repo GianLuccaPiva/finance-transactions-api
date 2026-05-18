@@ -1,4 +1,4 @@
-package com.pismo.controller;
+package com.financetransactions.controller;
 
 
 import org.springframework.http.HttpStatus;
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.pismo.dto.TransactionRequest;
-import com.pismo.dto.TransactionResponse;
-import com.pismo.service.TransactionService;
+import com.financetransactions.dto.TransactionRequest;
+import com.financetransactions.dto.TransactionResponse;
+import com.financetransactions.service.TransactionService;
 
 
 import jakarta.validation.Valid;
