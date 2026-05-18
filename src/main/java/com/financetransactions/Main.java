@@ -1,4 +1,4 @@
-package com.pismo;
+package com.financetransactions;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

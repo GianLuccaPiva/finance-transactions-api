@@ -1,4 +1,4 @@
-package com.pismo.dto;
+package com.financetransactions.dto;
 
 public class ClientAccountResponse {
 

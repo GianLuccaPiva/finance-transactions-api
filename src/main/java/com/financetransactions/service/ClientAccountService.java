@@ -1,15 +1,15 @@
-package com.pismo.service;
+package com.financetransactions.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pismo.exception.InvalidTransactionException;
-import com.pismo.exception.AccountNotFoundException;
-import com.pismo.exception.DuplicateDocumentException;
-import com.pismo.dto.ClientAccountRequest;
-import com.pismo.dto.ClientAccountResponse;
-import com.pismo.model.ClientAccountModel;
-import com.pismo.repository.ClientAccountRepo;
+import com.financetransactions.exception.InvalidTransactionException;
+import com.financetransactions.exception.AccountNotFoundException;
+import com.financetransactions.exception.DuplicateDocumentException;
+import com.financetransactions.dto.ClientAccountRequest;
+import com.financetransactions.dto.ClientAccountResponse;
+import com.financetransactions.model.ClientAccountModel;
+import com.financetransactions.repository.ClientAccountRepo;
 
 @Service
 public class ClientAccountService {

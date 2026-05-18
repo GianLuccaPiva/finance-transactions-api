@@ -1,4 +1,4 @@
-# Pismo Technical Assessment
+# Finance Transactions API
 
 REST API developed with Java 17 and Spring Boot 3 for account and transaction management.
 
@@ -36,7 +36,11 @@ The API will be available at `http://localhost:8080`
 |--------|------|-------------|
 | POST | `/accounts` | Create a new account |
 | GET | `/accounts/{id}` | Get account by ID |
+| DELETE | `/accounts/{id}` | Deactivate account (soft delete) |
+| GET | `/accounts/{id}/transactions` | List all transactions for an account |
+| GET | `/accounts/{id}/balance` | Get current balance for an account |
 | POST | `/transactions` | Create a new transaction |
+| GET | `/transactions?page=0&size=10` | List all transactions (paginated) |
 
 ## Operation Types
 
@@ -56,16 +60,20 @@ chmod +x test.sh
 ./test.sh
 ```
 
-The script will prompt you for the following values:
+The script presents an interactive menu:
 
-| Prompt | Example | Rule |
-|--------|---------|------|
-| Document number | `12345678901` | Exactly 11 digits |
-| Account ID | `1` | Must be an existing account |
-| Operation type ID | `1`, `2`, `3` or `4` | See operation types table above |
-| Amount | `-50.00` or `50.00` | Types 1, 2, 3 → negative \| Type 4 → positive |
+```
+1) POST   /accounts
+2) GET    /accounts/{id}
+3) POST   /transactions
+4) GET    /accounts/{id}/transactions
+5) GET    /accounts/{id}/balance
+6) GET    /transactions?page=0&size=10
+7) DELETE /accounts/{id}
+8) Rodar todos
+```
 
-The script runs three requests in sequence: POST /accounts → GET /accounts/{id} → POST /transactions.
+Each option prompts only for the values it needs. Option 8 runs all endpoints in sequence.
 
 ### Test cases
 
@@ -95,6 +103,31 @@ curl -X POST http://localhost:8080/accounts \
 **Account not found**
 ```bash
 curl http://localhost:8080/accounts/999
+```
+
+**Deactivate account (soft delete)**
+```bash
+curl -X DELETE http://localhost:8080/accounts/1
+```
+
+**Deactivate already inactive account**
+```bash
+curl -X DELETE http://localhost:8080/accounts/1
+```
+
+**List transactions for an account**
+```bash
+curl http://localhost:8080/accounts/1/transactions
+```
+
+**Get balance for an account**
+```bash
+curl http://localhost:8080/accounts/1/balance
+```
+
+**List all transactions (paginated)**
+```bash
+curl "http://localhost:8080/transactions?page=0&size=10"
 ```
 
 **Valid transaction (PURCHASE — negative amount)**
@@ -138,6 +171,19 @@ curl -X POST http://localhost:8080/transactions \
   -H "Content-Type: application/json" \
   -d '{"accountId": 1, "operationTypeId": 4, "amount": -50.00}'
 ```
+
+## Unit Tests
+
+Unit tests are written with JUnit 5 + Mockito and cover both service layers.
+
+```bash
+mvn test
+```
+
+| Test class | Tests | Coverage |
+|------------|-------|----------|
+| `ClientAccountServiceTest` | 8 | Create account, get account, duplicate document, account not found, deactivate account, deactivate already inactive |
+| `TransactionTest` | 15 | Create transaction, amount validations, account/operation not found, get transactions by account, get balance, paginated listing |
 
 ## API Documentation
 

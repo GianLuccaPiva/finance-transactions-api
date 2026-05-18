@@ -1,4 +1,4 @@
-package com.pismo.exception;
+package com.financetransactions.exception;
 
 public class DuplicateDocumentException extends RuntimeException {
     public DuplicateDocumentException() {

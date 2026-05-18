@@ -1,4 +1,4 @@
-package com.pismo.model;
+package com.financetransactions.model;
 
 import java.math.BigDecimal;
 

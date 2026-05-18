@@ -12,10 +12,10 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.pismo</groupId>
-    <artifactId>pismo</artifactId>
+    <groupId>com.financetransactions</groupId>
+    <artifactId>finance-transactions-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>pismo</name>
+    <name>finance-transactions-api</name>
 
     <properties>
         <java.version>17</java.version>
